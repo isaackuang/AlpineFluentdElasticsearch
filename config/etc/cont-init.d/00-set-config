@@ -1,0 +1,26 @@
+#!/usr/bin/with-contenv sh
+
+cat << EOF > /etc/fluentd/fluent.conf
+<source>
+  @type  forward
+  @id   input
+  port  24224
+</source>
+
+<match **>
+  @type elasticsearch
+  host ${ELASTIC_HOST:=elasticsearch}
+  port ${ELASTIC_PORT:=80}
+  logstash_format true
+  scheme ${ELASTIC_SCHEME:=http}
+  ssl_version TLSv1_2
+  logstash_prefix \${tag}
+  logstash_dateformat %Y-%m
+  <buffer tag>
+    @type memory # or file
+    flush_thread_count 4
+  </buffer>
+</match>
+
+
+EOF
